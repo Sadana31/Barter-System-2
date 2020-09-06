@@ -41,17 +41,20 @@ export default class SignUpLoginScreen extends React.Component {
         return(
             <View style={styles.container}>
                 <Header
-                    backgroundColor={'#4c9900'}
+                    padding = {-30}
+                    backgroundColor={'#00cc00'}
                     centerComponent={{
                         text: 'BARTER SYSTEM',
-                        style: { color: '#fff', fontSize: 20 },
+                        style: { color: '#fff', fontSize: 20, fontWeight: "bold", margin: 10 },
                     }}
                 />
 
-                <View>
+                <Text style={styles.info1}>Welcome to Barter Sytem people!!</Text>
+
+                <View style={styles.container}>
                     <TextInput 
                         style={styles.inputBox}
-                        placeholder='Enter your emailID here'
+                        placeholder='Enter your emailID'
                         keyboardType = 'email-address'
                         onChangeText={(text)=>{
                             this.setState({emailId: text})
@@ -71,18 +74,20 @@ export default class SignUpLoginScreen extends React.Component {
                         style={styles.buttons}
                         onPress={()=>{
                             this.login(this.state.emailId,this.state.password);
+                            this.setState({emailID: "", password: ""});
                         }}
                     >
                         <Text style={styles.buttonText}>LOGIN</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.info}>Don't have an account?</Text>
-                    <Text style={styles.info}>Click below after entering your email & password</Text>
+                    <Text style={styles.info}>Don't have an account?    </Text>
+                    <Text style={styles.info}>Click below after entering your email & password!!</Text>
 
                     <TouchableOpacity
                         style={styles.buttons}
                         onPress={()=>{
                             this.signUp(this.state.emailId,this.state.password);
+                            this.setState({emailID: "", password: ""});
                         }}
                     >
                         <Text style={styles.buttonText}>SIGN UP</Text>
@@ -97,28 +102,51 @@ export default class SignUpLoginScreen extends React.Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#33ff33"
+        backgroundColor: "#336600"
     },
     inputBox: { 
-        borderWidth: 3,
-        width: '80%',
-        height: '20%'
+        width: 300,
+        height: 40,
+        borderBottomWidth:3,
+        borderColor : '#00cc00',
+        fontSize: 20,
+        margin: 10,
+        paddingLeft: 10,
+        color: "#00cc00",
+        fontWeight: "bold",
+        textAlign: "center"
     },
     buttons: {
-        backgroundColor: "#336600",
-        borderRadius: 10,
-        alignItems: "center",
+        backgroundColor: "#00cc00",
+        marginTop: 20,
+        width: 350,
+        height: 50,
+        borderWidth: 1.5,
+        marginBottom: 10,
+        borderRadius: 15,
+        alignSelf: 'center',
     },
     buttonText: {
-        fontWeight: "bold",
-        color: "white",
-        fontSize: 15
+        fontSize: 25,
+        textAlign: 'center',
+        marginTop: 7,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
     },
     info: {
-        color: "#336600",
+        color: "#00cc00",
         fontWeight: "bold",
-        fontSize: 25
-    }
+        textAlign: 'center',
+        fontSize: 25,
+        marginTop: 20
+    },
+    info1: {
+        color: "#00cc00",
+        fontWeight: "bold",
+        textAlign: 'center',
+        fontSize: 30,
+        margin: 1
+    },
+    
 })
