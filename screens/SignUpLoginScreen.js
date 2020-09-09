@@ -1,5 +1,6 @@
 import * as React from 'react';
-import {Text,View, TextInput, TouchableOpacity, StyleSheet, Alert} from 'react-native';
+import {Text,View, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView,
+ScrollView, Modal} from 'react-native';
 import db from '../config';
 import firebase from 'firebase';
 import {Header} from 'react-native-elements';
@@ -9,7 +10,13 @@ export default class SignUpLoginScreen extends React.Component {
         super();
         this.state = {
             emailId: '',
-            password: ''
+            password: '',
+            isModalVisible: false,
+            firstName: '',
+            lastName: '',
+            contatc: '',
+            address: '',
+            confirmPassword: ''
         }
     }
 
@@ -28,7 +35,13 @@ export default class SignUpLoginScreen extends React.Component {
     login=(emailID,password)=>{
         firebase.auth().signInWithEmailAndPassword(emailID,password)
         .then(()=>{
-            return Alert.alert("You have successfully logged in!!");
+            return  Alert.alert(
+                'You have logged in!',
+                '',
+                [
+                  {text: 'OK', onPress: () => this.setState({emailId: '', password: ""})},
+                ]
+            );
         })
         .catch(function(error){
             var errorCode = error.code;
@@ -37,32 +50,191 @@ export default class SignUpLoginScreen extends React.Component {
         })
     }
 
+    userSignUp=(username,password,confirmPassword)=>{
+        if(password !== confirmPassword){
+            return Alert.alert("The two passwords you entered don't match!!");
+        }
+        else {
+            firebase.auth().createUserWithEmailAndPassword(username,password)
+            .then((response)=>{
+                db.collection("users").add({
+                    firstName: this.state.firstName,
+                    lastName: this.state.lastName,
+                    contact: this.state.contact,
+                    address: this.state.address,
+                    emailId: this.state.emailId,
+                })
+
+                return  Alert.alert(
+                    'User Added Successfully',
+                    '',
+                    [
+                      {text: 'OK', onPress: () => this.setState({"isModalVisible" : false})},
+                    ]
+                );
+            })
+            .catch(function(error){
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                return Alert.alert(errorMessage);
+            })
+        }
+    }
+
+    showModal=()=>{
+        return(
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={this.state.isModalVisible}
+              >
+              <View style={styles.modalContainer}>
+                <ScrollView style={{width:'100%'}}>
+                  <KeyboardAvoidingView style={styles.KeyboardAvoidingView}>
+                  <Text style={styles.modalTitle}>Register here!!   </Text>
+                  <TextInput
+                    style={styles.formTextInput}
+                    placeholder ={"First Name"}
+                    maxLength ={8}
+                    onChangeText={(text)=>{
+                      this.setState({
+                        firstName: text
+                      })
+                    }}
+                  />
+                  <TextInput
+                    style={styles.formTextInput}
+                    placeholder ={"Last Name"}
+                    maxLength ={8}
+                    onChangeText={(text)=>{
+                      this.setState({
+                        lastName: text
+                      })
+                    }}
+                  />
+                  <TextInput
+                    style={styles.formTextInput}
+                    placeholder ={"Contact"}
+                    maxLength ={10}
+                    keyboardType={'numeric'}
+                    onChangeText={(text)=>{
+                      this.setState({
+                        contact: text
+                      })
+                    }}
+                  />
+                  <TextInput
+                    style={styles.formTextInput}
+                    placeholder ={"Address"}
+                    multiline = {true}
+                    onChangeText={(text)=>{
+                      this.setState({
+                        address: text
+                      })
+                    }}
+                  />
+                  <TextInput
+                    style={styles.formTextInput}
+                    placeholder ={"Email"}
+                    keyboardType ={'email-address'}
+                    onChangeText={(text)=>{
+                      this.setState({
+                        emailId: text
+                      })
+                    }}
+                  /><TextInput
+                    style={styles.formTextInput}
+                    placeholder ={"Password"}
+                    secureTextEntry = {true}
+                    onChangeText={(text)=>{
+                      this.setState({
+                        password: text
+                      })
+                    }}
+                  /><TextInput
+                    style={styles.formTextInput}
+                    placeholder ={"Confrim Password"}
+                    secureTextEntry = {true}
+                    onChangeText={(text)=>{
+                      this.setState({
+                        confirmPassword: text
+                      })
+                    }}
+                  />
+                  <View style={styles.modalBackButton}>
+                    <TouchableOpacity
+                      style={styles.registerButton}
+                      onPress={()=>{
+                        if(this.state.firstName===""){
+                              return Alert.alert("Please enter your name!!");
+                        }
+                        if(this.state.lastName===""){
+                            return Alert.alert("Please enter your name!!");
+                        } 
+                        if(this.state.contact===""){
+                            return Alert.alert("Please enter your contact!!");
+                        }
+                        if(this.state.address===""){
+                            return Alert.alert("Please enter your address!!");
+                        }
+                        if(this.state.confirmPassword===""){
+                            return Alert.alert("Please enter all your password!!");
+                        }
+                        else {
+                            this.userSignUp(this.state.emailId, this.state.password, this.state.confirmPassword)
+                        }
+                      }}
+                    >
+                    <Text style={styles.registerButtonText}>Register    </Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.modalBackButton}>
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={()=>this.setState({"isModalVisible":false})}
+                    >
+                    <Text style={styles.registerButtonText}>Cancel  </Text>
+                    </TouchableOpacity>
+                  </View>
+                  </KeyboardAvoidingView>
+                </ScrollView>
+              </View>
+            </Modal>
+        )
+    }
+
     render(){
         return(
-            <View style={styles.container}>
+            <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
+                {
+                    this.showModal()
+                }
                 <Header
                     padding = {-30}
-                    backgroundColor={'#00cc00'}
+                    backgroundColor={'#000033'}
                     centerComponent={{
                         text: 'BARTER SYSTEM',
                         style: { color: '#fff', fontSize: 20, fontWeight: "bold", margin: 10 },
                     }}
                 />
 
-                <Text style={styles.info1}>Welcome to Barter Sytem people!!</Text>
+                <Text style={styles.info1}>Welcome to    </Text>
+                <Text style={styles.info1}>Barter System!!  </Text>
 
-                <View style={styles.container}>
-                    <TextInput 
-                        style={styles.inputBox}
-                        placeholder='Enter your emailID'
-                        keyboardType = 'email-address'
+                <View>
+                   <TextInput
+                        style={styles.loginBox}
+                        placeholder="Enter your email ID"
+                        keyboardType ='email-address'
                         onChangeText={(text)=>{
-                            this.setState({emailId: text})
+                        this.setState({
+                            emailId: text
+                        })
                         }}
                     />
 
                     <TextInput 
-                        style={styles.inputBox}
+                        style={styles.loginBox}
                         placeholder='Enter your password'
                         secureTextEntry = {true}
                         onChangeText={(text)=>{
@@ -80,21 +252,20 @@ export default class SignUpLoginScreen extends React.Component {
                         <Text style={styles.buttonText}>LOGIN</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.info}>Don't have an account?    </Text>
+                    <Text style={styles.info}>No account?    </Text>
                     <Text style={styles.info}>Click below after entering your email & password!!</Text>
 
                     <TouchableOpacity
                         style={styles.buttons}
                         onPress={()=>{
-                            this.signUp(this.state.emailId,this.state.password);
-                            this.setState({emailID: "", password: ""});
+                            //this.signUp(this.state.emailId,this.state.password);
+                            this.setState({emailID: "", password: "", isModalVisible: true});
                         }}
                     >
                         <Text style={styles.buttonText}>SIGN UP</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
-            
+            </KeyboardAvoidingView>
         )
     }
 }
@@ -103,22 +274,21 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        backgroundColor: "#336600"
+        backgroundColor: "#808080"
     },
-    inputBox: { 
+    loginBox:{
         width: 300,
         height: 40,
-        borderBottomWidth:3,
-        borderColor : '#00cc00',
+        borderBottomWidth: 3,
+        borderColor : '#000066',
         fontSize: 20,
-        margin: 10,
-        paddingLeft: 10,
-        color: "#00cc00",
-        fontWeight: "bold",
+        margin:10,
+        paddingLeft:10,
+        alignSelf: "center",
         textAlign: "center"
-    },
+      },
     buttons: {
-        backgroundColor: "#00cc00",
+        backgroundColor: "#000099",
         marginTop: 20,
         width: 350,
         height: 50,
@@ -135,18 +305,83 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
     },
     info: {
-        color: "#00cc00",
+        color: "#000033",
         fontWeight: "bold",
         textAlign: 'center',
         fontSize: 25,
-        marginTop: 20
+        marginTop: 20,
     },
     info1: {
-        color: "#00cc00",
+        color: "#000033",
         fontWeight: "bold",
         textAlign: 'center',
         fontSize: 30,
-        margin: 1
+        marginTop: 10
     },
-    
+    formTextInput:{
+        width:"75%",
+        height:35,
+        alignSelf:'center',
+        borderColor:'#ffab91',
+        borderRadius:10,
+        borderWidth:1,
+        marginTop:20,
+        padding:10
+      },
+      modalTitle :{
+        justifyContent:'center',
+        alignSelf:'center',
+        fontSize:30,
+        color:'#000066',
+        margin:30,
+        fontWeight: "bold"
+      },
+      modalContainer:{
+        flex:1,
+        borderRadius:20,
+        justifyContent:'center',
+        alignItems:'center',
+        backgroundColor:"#ffff",
+        marginRight:30,
+        marginLeft : 30,
+        marginTop:80,
+        marginBottom:80,
+      },
+      formTextInput:{
+        width:"75%",
+        height:"6%",
+        alignSelf:'center',
+        borderColor:'#000099',
+        borderRadius:10,
+        borderWidth:2,
+        marginTop:20,
+        padding:10,
+        textAlign: "center",
+        fontWeight: "bold"
+      },
+      registerButton:{
+        width:200,
+        height:40,
+        alignItems:'center',
+        justifyContent:'center',
+        borderWidth:1,
+        borderRadius:10,
+        marginTop:30,
+        alignSelf: "center"
+      },
+      registerButtonText:{
+        color:'#ff5722',
+        fontSize:15,
+        fontWeight:'bold'
+      },
+      cancelButton:{
+        width:200,
+        height:40,
+        alignItems:'center',
+        justifyContent:'center',
+        borderWidth:1,
+        borderRadius:10,
+        marginTop:30,
+        alignSelf: "center"
+      },
 })
